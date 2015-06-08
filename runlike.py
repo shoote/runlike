@@ -61,17 +61,19 @@ class Inspector(object):
                 self.options.append('--volumes-from %s' % vol)
 
         ports = self.get_fact("NetworkSettings.Ports")
-        for port_and_proto, options in ports.iteritems():
-            host_ip = options[0]["HostIp"]
-            host_port = options[0]["HostPort"]
-            container_port = port_and_proto.split("/")[0]
-            self.options.append('-p %s:%s:%s' % (host_ip, host_port, container_port))
+        if ports:
+            for port_and_proto, options in ports.iteritems():
+                host_ip = options[0]["HostIp"]
+                host_port = options[0]["HostPort"]
+                container_port = port_and_proto.split("/")[0]
+                self.options.append('-p %s:%s:%s' % (host_ip, host_port, container_port))
 
         links = self.get_fact("HostConfig.Links")
-        for link in links:
-            src, dst = link.split(":")
-            dst = dst.split("/")[1]
-            self.options.append('--link %s:%s' % (src, dst))
+        if links:
+            for link in links:
+                src, dst = link.split(":")
+                dst = dst.split("/")[1]
+                self.options.append('--link %s:%s' % (src, dst))
 
         # i didn't find anything other than AttachStderr/AttachStdin/AttachStdout to detect --detach
         stdout_attached = self.get_fact("Config.AttachStdout")
